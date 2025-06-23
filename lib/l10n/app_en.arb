@@ -1,0 +1,20 @@
+{
+  "@@locale": "en",
+  "appName": "RoutineUp",
+  "home": "H O M E",
+  "settings": "S E T T I N G S",
+  "logout": "L O G O U T",
+  "darkMode": "Dark Mode",
+  "language": "Language",
+  "noHabitsYet": "No habits yet",
+  "createFirstHabit": "Create your first habit by pressing the '+' button above!",
+  "createHabit": "Create New Habit",
+  "editHabit": "Edit Habit",
+  "habitNameHint": "Habit Name",
+  "scheduleOnDays": "Schedule on days:",
+  "scheduleHint": "(Leave empty for every day)",
+  "deleteThis": "Delete this habit?",
+  "delete": "Delete",
+  "save": "Save",
+  "cancel": "Cancel"
+}

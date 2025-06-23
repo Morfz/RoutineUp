@@ -1,0 +1,20 @@
+{
+  "@@locale": "id",
+  "appName": "RoutineUp",
+  "home": "B E R A N D A",
+  "settings": "P E N G A T U R A N",
+  "logout": "K E L U A R",
+  "darkMode": "Mode Gelap",
+  "language": "Bahasa",
+  "noHabitsYet": "Belum ada kebiasaan",
+  "createFirstHabit": "Yuk, buat kebiasaan pertamamu dengan menekan tombol '+' di atas!",
+  "createHabit": "Buat Kebiasaan Baru",
+  "editHabit": "Edit Kebiasaan",
+  "habitNameHint": "Nama Kebiasaan",
+  "scheduleOnDays": "Jadwalkan di hari:",
+  "scheduleHint": "(Kosongkan untuk setiap hari)",
+  "deleteThis": "Hapus kebiasaan ini?",
+  "delete": "Hapus",
+  "save": "Simpan",
+  "cancel": "Batal"
+}
