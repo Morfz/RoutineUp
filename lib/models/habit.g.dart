@@ -20,7 +20,8 @@ const HabitSchema = CollectionSchema(
     r'completedDays': PropertySchema(
       id: 0,
       name: r'completedDays',
-      type: IsarType.dateTimeList,
+      type: IsarType.objectList,
+      target: r'HabitCompletion',
     ),
     r'name': PropertySchema(
       id: 1,
@@ -40,7 +41,7 @@ const HabitSchema = CollectionSchema(
   idName: r'id',
   indexes: {},
   links: {},
-  embeddedSchemas: {},
+  embeddedSchemas: {r'HabitCompletion': HabitCompletionSchema},
   getId: _habitGetId,
   getLinks: _habitGetLinks,
   attach: _habitAttach,
@@ -53,7 +54,15 @@ int _habitEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.completedDays.length * 8;
+  bytesCount += 3 + object.completedDays.length * 3;
+  {
+    final offsets = allOffsets[HabitCompletion]!;
+    for (var i = 0; i < object.completedDays.length; i++) {
+      final value = object.completedDays[i];
+      bytesCount +=
+          HabitCompletionSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
   bytesCount += 3 + object.name.length * 3;
   bytesCount += 3 + object.scheduledDays.length * 8;
   return bytesCount;
@@ -65,7 +74,12 @@ void _habitSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTimeList(offsets[0], object.completedDays);
+  writer.writeObjectList<HabitCompletion>(
+    offsets[0],
+    allOffsets,
+    HabitCompletionSchema.serialize,
+    object.completedDays,
+  );
   writer.writeString(offsets[1], object.name);
   writer.writeLongList(offsets[2], object.scheduledDays);
 }
@@ -77,7 +91,13 @@ Habit _habitDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Habit();
-  object.completedDays = reader.readDateTimeList(offsets[0]) ?? [];
+  object.completedDays = reader.readObjectList<HabitCompletion>(
+        offsets[0],
+        HabitCompletionSchema.deserialize,
+        allOffsets,
+        HabitCompletion(),
+      ) ??
+      [];
   object.id = id;
   object.name = reader.readString(offsets[1]);
   object.scheduledDays = reader.readLongList(offsets[2]) ?? [];
@@ -92,7 +112,13 @@ P _habitDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTimeList(offset) ?? []) as P;
+      return (reader.readObjectList<HabitCompletion>(
+            offset,
+            HabitCompletionSchema.deserialize,
+            allOffsets,
+            HabitCompletion(),
+          ) ??
+          []) as P;
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
@@ -190,61 +216,6 @@ extension HabitQueryWhere on QueryBuilder<Habit, Habit, QWhereClause> {
 }
 
 extension HabitQueryFilter on QueryBuilder<Habit, Habit, QFilterCondition> {
-  QueryBuilder<Habit, Habit, QAfterFilterCondition> completedDaysElementEqualTo(
-      DateTime value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'completedDays',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Habit, Habit, QAfterFilterCondition>
-      completedDaysElementGreaterThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.greaterThan(
-        include: include,
-        property: r'completedDays',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Habit, Habit, QAfterFilterCondition>
-      completedDaysElementLessThan(
-    DateTime value, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.lessThan(
-        include: include,
-        property: r'completedDays',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<Habit, Habit, QAfterFilterCondition> completedDaysElementBetween(
-    DateTime lower,
-    DateTime upper, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.between(
-        property: r'completedDays',
-        lower: lower,
-        includeLower: includeLower,
-        upper: upper,
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
   QueryBuilder<Habit, Habit, QAfterFilterCondition> completedDaysLengthEqualTo(
       int length) {
     return QueryBuilder.apply(this, (query) {
@@ -651,7 +622,14 @@ extension HabitQueryFilter on QueryBuilder<Habit, Habit, QFilterCondition> {
   }
 }
 
-extension HabitQueryObject on QueryBuilder<Habit, Habit, QFilterCondition> {}
+extension HabitQueryObject on QueryBuilder<Habit, Habit, QFilterCondition> {
+  QueryBuilder<Habit, Habit, QAfterFilterCondition> completedDaysElement(
+      FilterQuery<HabitCompletion> q) {
+    return QueryBuilder.apply(this, (query) {
+      return query.object(q, r'completedDays');
+    });
+  }
+}
 
 extension HabitQueryLinks on QueryBuilder<Habit, Habit, QFilterCondition> {}
 
@@ -696,12 +674,6 @@ extension HabitQuerySortThenBy on QueryBuilder<Habit, Habit, QSortThenBy> {
 }
 
 extension HabitQueryWhereDistinct on QueryBuilder<Habit, Habit, QDistinct> {
-  QueryBuilder<Habit, Habit, QDistinct> distinctByCompletedDays() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'completedDays');
-    });
-  }
-
   QueryBuilder<Habit, Habit, QDistinct> distinctByName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -723,7 +695,7 @@ extension HabitQueryProperty on QueryBuilder<Habit, Habit, QQueryProperty> {
     });
   }
 
-  QueryBuilder<Habit, List<DateTime>, QQueryOperations>
+  QueryBuilder<Habit, List<HabitCompletion>, QQueryOperations>
       completedDaysProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'completedDays');

@@ -1,3 +1,5 @@
+// lib/pages/home_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:routineup/components/my_calendar.dart';
@@ -8,6 +10,7 @@ import 'package:routineup/l10n/app_localizations.dart';
 import 'package:routineup/models/habit.dart';
 import 'package:routineup/util/habit_util.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart' as intl;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,6 +35,51 @@ class _HomePageState extends State<HomePage> {
     if (value != null) {
       context.read<HabitDatabase>().updateHabitCompletion(habit.id, value);
     }
+  }
+
+  void _showNoteDialog(Habit habit) {
+    final normalizedDate = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+    String existingNote = "";
+    // Cari catatan yang sudah ada
+    for (final completion in habit.completedDays) {
+      if (completion.date != null && DateTime(completion.date!.year, completion.date!.month, completion.date!.day).isAtSameMomentAs(normalizedDate)) {
+        existingNote = completion.note ?? "";
+        break;
+      }
+    }
+
+    final noteController = TextEditingController(text: existingNote);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: const Text("Catatan Kebiasaan"),
+          content: TextField(
+            controller: noteController,
+            autofocus: true,
+            maxLines: 3,
+            decoration: const InputDecoration(
+              hintText: "Tulis catatan Anda di sini...",
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<HabitDatabase>().updateHabitNote(habit.id, _selectedDate, noteController.text);
+                Navigator.pop(context);
+              },
+              child: Text(AppLocalizations.of(context)!.save),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showHabitDialog({Habit? habit}) {
@@ -211,12 +259,29 @@ class _HomePageState extends State<HomePage> {
         bool canEdit = isSameDay(_selectedDate, DateTime.now());
         int streak = calculateHabitStreak(habit, _selectedDate);
 
+        // PERUBAHAN 2: Cari catatan untuk tanggal yang dipilih
+        String? note;
+        if (isCompleted) {
+          final normalizedDate = DateTime(_selectedDate.year, _selectedDate.month, _selectedDate.day);
+          // Gunakan loop yang aman untuk menghindari error jika data tidak ditemukan
+          for (final completion in habit.completedDays) {
+            if (completion.date != null &&
+                DateTime(completion.date!.year, completion.date!.month, completion.date!.day)
+                    .isAtSameMomentAs(normalizedDate)) {
+              note = completion.note;
+              break; // Ditemukan, keluar dari loop
+            }
+          }
+        }
+
         return MyHabitTile(
           text: habit.name,
+          noteText: note, // <-- BARU: Kirim catatan ke tile
           isCompleted: isCompleted,
           onChanged: (value) => checkHabitOnOff(value, habit),
           editHabit: (context) => _showHabitDialog(habit: habit),
           deleteHabit: (context) => deleteHabitBox(habit),
+          onNotePressed: (context) => _showNoteDialog(habit),
           isEditingEnabled: canEdit,
           streakCount: streak,
         );
@@ -225,7 +290,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildDaySelector(List<int> selectedDays, StateSetter setDialogState) {
-    final days = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+    // 1. Ambil nama locale yang sedang aktif (contoh: 'en' atau 'id')
+    final localeName = AppLocalizations.of(context)!.localeName;
+
+    // 2. FIX: Dapatkan simbol tanggal menggunakan DateFormat.
+    // Ini adalah cara yang lebih aman dan terjamin.
+    // Kita buat format 'E' (nama hari pendek) untuk locale yang aktif, lalu ambil simbolnya.
+    final dateSymbols = intl.DateFormat.E(localeName).dateSymbols;
+
+    // 3. Ambil daftar nama hari pendek (dimulai dari Minggu -> Sabtu)
+    final shortWeekdays = dateSymbols.SHORTWEEKDAYS;
+
+    // 4. Atur ulang urutan agar dimulai dari Senin -> Minggu sesuai logika UI kita
+    final days = shortWeekdays.sublist(1)..add(shortWeekdays[0]);
+
     return Wrap(
       spacing: 4.0,
       runSpacing: 0.0,

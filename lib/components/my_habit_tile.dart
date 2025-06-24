@@ -1,9 +1,12 @@
+// lib/components/my_habit_tile.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 class MyHabitTile extends StatelessWidget {
   final String text;
+  final String? noteText;
   final bool isCompleted;
   final void Function(bool?)? onChanged;
   final void Function(BuildContext)? editHabit;
@@ -15,6 +18,7 @@ class MyHabitTile extends StatelessWidget {
   const MyHabitTile({
     super.key,
     required this.text,
+    this.noteText,
     required this.isCompleted,
     required this.onChanged,
     required this.editHabit,
@@ -26,23 +30,15 @@ class MyHabitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Perkiraan tinggi ListTile untuk membuat tombol aksi menjadi persegi.
-    // Padding vertikal (5*2) + Padding dalam Container (12*2) + tinggi Checkbox (sekitar 24-30)
-    // Total tinggi sekitar 54-64. Kita bisa gunakan nilai ini untuk lebar.
-    const double actionWidth = 60.0;
+    final bool hasNote = noteText != null && noteText!.isNotEmpty;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 20),
       child: Slidable(
         endActionPane: ActionPane(
           motion: const DrawerMotion(),
-          // Atur extentRatio untuk mengontrol lebar total dari action pane.
-          // Jika lebar layar adalah 400, dan kita mau 2 tombol selebar 60,
-          // maka total lebar adalah 120. extentRatio = 120 / 400 = 0.3
-          // Nilai 0.4 ini bisa Anda sesuaikan agar terlihat pas di perangkat Anda.
-          extentRatio: 0.4, // Sesuaikan nilai ini
+          extentRatio: 0.4,
           children: [
-            // Gunakan Expanded agar kedua tombol memiliki lebar yang sama
             Expanded(
               child: SlidableAction(
                 onPressed: editHabit,
@@ -64,6 +60,7 @@ class MyHabitTile extends StatelessWidget {
           ],
         ),
         child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: () {
             if (isEditingEnabled) {
               onChanged?.call(!isCompleted);
@@ -75,46 +72,84 @@ class MyHabitTile extends StatelessWidget {
               color: Theme.of(context).colorScheme.secondary,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Checkbox(
-                  value: isCompleted,
-                  onChanged: isEditingEnabled ? onChanged : null,
-                  activeColor: Colors.green,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Checkbox(
+                      value: isCompleted,
+                      onChanged: isEditingEnabled ? onChanged : null,
+                      activeColor: Colors.green,
+                    ),
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isCompleted
+                              ? Theme.of(context)
+                              .colorScheme
+                              .inversePrimary
+                              .withOpacity(0.5)
+                              : Theme.of(context).colorScheme.inversePrimary,
+                          decoration: isCompleted
+                              ? TextDecoration.lineThrough
+                              : TextDecoration.none,
+                          decorationColor: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 400),
+                      opacity: streakCount > 1 ? 1.0 : 0.0,
+                      child: Row(
+                        children: [
+                          const Text('🔥', style: TextStyle(fontSize: 16)),
+                          const SizedBox(width: 4),
+                          Text(
+                            streakCount.toString(),
+                            style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.inversePrimary),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (isCompleted)
+                      IconButton(
+                        icon: Icon(
+                          hasNote ? Icons.description_outlined : Icons.note_add_outlined,
+                          color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.7),
+                        ),
+                        // --- FIX DI SINI ---
+                        // Bungkus pemanggilan onNotePressed di dalam fungsi anonim
+                        onPressed: () {
+                          // Pengecekan null untuk keamanan
+                          if (onNotePressed != null) {
+                            // Panggil fungsi dengan memberikan 'context' yang tersedia dari method build
+                            onNotePressed!(context);
+                          }
+                        },
+                      ),
+                  ],
                 ),
-                Expanded(
-                  child: Text(
-                    text,
-                    style: TextStyle(
-                      color: isCompleted
-                          ? Theme.of(context)
-                          .colorScheme
-                          .inversePrimary
-                          .withOpacity(0.5)
-                          : Theme.of(context).colorScheme.inversePrimary,
-                      decoration: isCompleted
-                          ? TextDecoration.lineThrough
-                          : TextDecoration.none,
+                if (hasNote)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 50.0, right: 10.0, top: 2.0, bottom: 4.0),
+                    child: Text(
+                      noteText!,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.6),
+                        fontStyle: FontStyle.italic,
+                      ),
                     ),
                   ),
-                ),
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 400),
-                  opacity: streakCount > 1 ? 1.0 : 0.0,
-                  child: Row(
-                    children: [
-                      const Text('🔥', style: TextStyle(fontSize: 16)),
-                      const SizedBox(width: 4),
-                      Text(
-                        streakCount.toString(),
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.inversePrimary),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
