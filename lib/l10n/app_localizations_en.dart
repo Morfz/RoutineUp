@@ -59,4 +59,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cancel => 'Cancel';
+
+  @override
+  String get statistics => 'S T A T I S T I C S';
+
+  @override
+  String get yearlySummary => 'Yearly Summary';
+
+  @override
+  String get longestStreak => 'Longest Streak';
+
+  @override
+  String get days => 'days';
+
+  @override
+  String get mostProductiveDay => 'Most Productive Day';
 }

@@ -1,6 +1,10 @@
+// lib/components/my_drawer.dart
+
 import 'package:flutter/material.dart';
 import 'package:routineup/l10n/app_localizations.dart';
 import 'package:routineup/pages/settings_page.dart';
+// Import halaman statistik yang akan kita buat
+import 'package:routineup/pages/statistics_page.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -31,19 +35,34 @@ class MyDrawer extends StatelessWidget {
               icon: Icons.home_rounded,
               title: AppLocalizations.of(context)!.home,
               onTap: () {
-                // Cukup tutup drawer karena kita sudah di home
                 Navigator.pop(context);
               },
             ),
             const SizedBox(height: 20),
+
+            // --- TAMBAHKAN ITEM MENU STATISTIK DI SINI ---
+            _buildDrawerItem(
+              context: context,
+              icon: Icons.bar_chart_rounded, // Ikon baru
+              title: AppLocalizations.of(context)!.statistics, // Teks baru (dari lokalisasi)
+              onTap: () {
+                Navigator.pop(context); // Tutup drawer
+                // Buka halaman statistik
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const StatisticsPage()),
+                );
+              },
+            ),
+            const SizedBox(height: 20),
+            // -----------------------------------------
+
             _buildDrawerItem(
               context: context,
               icon: Icons.settings_rounded,
               title: AppLocalizations.of(context)!.settings,
               onTap: () {
-                // Tutup drawer dulu
                 Navigator.pop(context);
-                // Navigasi ke Halaman Pengaturan
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const SettingsPage()),
@@ -51,25 +70,13 @@ class MyDrawer extends StatelessWidget {
               },
             ),
 
-            // Spacer untuk mendorong logout ke bawah
             const Spacer(),
-
-            // --- Logout Button ---
-            // _buildDrawerItem(
-            //   context: context,
-            //   icon: Icons.logout_rounded,
-            //   title: 'L O G O U T',
-            //   onTap: () {
-            //     // Fungsi logout bisa ditambahkan di sini nanti
-            //   },
-            // ),
           ],
         ),
       ),
     );
   }
 
-  // Helper widget untuk membuat item menu yang konsisten
   Widget _buildDrawerItem({
     required BuildContext context,
     required IconData icon,

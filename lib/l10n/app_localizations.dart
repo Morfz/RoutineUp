@@ -199,6 +199,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Cancel'**
   String get cancel;
+
+  /// No description provided for @statistics.
+  ///
+  /// In en, this message translates to:
+  /// **'S T A T I S T I C S'**
+  String get statistics;
+
+  /// No description provided for @yearlySummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly Summary'**
+  String get yearlySummary;
+
+  /// No description provided for @longestStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest Streak'**
+  String get longestStreak;
+
+  /// No description provided for @days.
+  ///
+  /// In en, this message translates to:
+  /// **'days'**
+  String get days;
+
+  /// No description provided for @mostProductiveDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Most Productive Day'**
+  String get mostProductiveDay;
 }
 
 class _AppLocalizationsDelegate

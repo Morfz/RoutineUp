@@ -16,5 +16,10 @@
   "deleteThis": "Hapus kebiasaan ini?",
   "delete": "Hapus",
   "save": "Simpan",
-  "cancel": "Batal"
+  "cancel": "Batal",
+  "statistics": "S T A T I S T I K",
+  "yearlySummary": "Ringkasan Tahunan",
+  "longestStreak": "Runtutan Terpanjang",
+  "days": "hari",
+  "mostProductiveDay": "Hari Paling Produktif"
 }

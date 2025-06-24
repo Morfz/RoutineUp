@@ -16,5 +16,10 @@
   "deleteThis": "Delete this habit?",
   "delete": "Delete",
   "save": "Save",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "statistics": "S T A T I S T I C S",
+  "yearlySummary": "Yearly Summary",
+  "longestStreak": "Longest Streak",
+  "days": "days",
+  "mostProductiveDay": "Most Productive Day"
 }

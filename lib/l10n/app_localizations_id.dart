@@ -59,4 +59,19 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get cancel => 'Batal';
+
+  @override
+  String get statistics => 'S T A T I S T I K';
+
+  @override
+  String get yearlySummary => 'Ringkasan Tahunan';
+
+  @override
+  String get longestStreak => 'Runtutan Terpanjang';
+
+  @override
+  String get days => 'hari';
+
+  @override
+  String get mostProductiveDay => 'Hari Paling Produktif';
 }
